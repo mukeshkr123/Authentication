@@ -88,7 +88,17 @@ const loginUserCtrl = async (req, res) => {
     // Create jwt token using userSchema method( jwtToken() )
     const token = user.jwtToken();
     user.password = undefined;
-    res.json(token);
+
+    res.cookie("token", token, {
+      maxAge: 3600000, // Cookie expiration time (1 hour in this example)
+      httpOnly: true, // The cookie cannot be accessed by JavaScript
+      // secure: true, // Enable this on HTTPS connections
+    });
+
+    res.status(200).json({
+      success: true,
+      data: user,
+    });
   } catch (error) {
     return res.status(400).json({
       success: false,
