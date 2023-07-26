@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "User name is required"],
     minlength: [5, "Name must be at least 5 characters"],
-    maxlength: [10, "Name must be less than 10 characters"],
+    maxlength: [50, "Name must be less than 10 characters"],
     trim: true,
   },
   email: {
@@ -26,9 +26,6 @@ const userSchema = new mongoose.Schema({
     type: Date,
   },
 });
-
-// Optionally, add indexes for improved query performance
-userSchema.index({ email: 1 });
 
 const User = mongoose.model("User", userSchema);
 
