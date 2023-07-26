@@ -1,6 +1,7 @@
 const User = require("../model/userSchema");
 const emailValidator = require("email-validator");
 const bcrypt = require("bcrypt");
+const generateToken = require("../config/token/generateToken.");
 
 // Register the user
 const registerUserCtrl = async (req, res) => {
@@ -70,21 +71,28 @@ const loginUserCtrl = async (req, res) => {
   }
 
   try {
-    // Find the user by email
-    const userFound = await User.findOne({ email }).select("+password");
+    // check user exist or not
+    const user = await User.findOne({
+      email,
+    }).select("+password");
 
-    if (userFound && (await bcrypt.compare(password, userFound.password))) {
-      return res.json(userFound);
-    } else {
+    // If user is null or the password is incorrect return response with error message
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      // bcrypt.compare returns boolean value
       return res.status(400).json({
-        success: false,
-        message: "Invalid Credentials",
+        success: true,
+        message: "invalid credentials",
       });
     }
+
+    // Create jwt token using userSchema method( jwtToken() )
+    const token = user.jwtToken();
+    user.password = undefined;
+    res.json(token);
   } catch (error) {
-    return res.status(500).json({
+    return res.status(400).json({
       success: false,
-      message: "Failed to log in",
+      message: error.message,
     });
   }
 };
