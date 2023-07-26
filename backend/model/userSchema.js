@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -25,6 +26,14 @@ const userSchema = new mongoose.Schema({
   forgotPasswordExpiryDate: {
     type: Date,
   },
+});
+
+// hash the password before saving
+userSchema.pre("save", async function (next) {
+  // if the password is not password is modified or changed then do nor hash it
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
+  return next();
 });
 
 const User = mongoose.model("User", userSchema);
